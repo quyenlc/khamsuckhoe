@@ -1,0 +1,46 @@
+version: "3.2"
+services:
+  mysql:
+    image: mysql/mysql-server:5.7  # Image được dùng để tạo container cho service
+    volumes:
+      - type: volume
+        source: 549d6f6b405eefbb7160556886769a814f0749bcdda481b8ebaf6bf640562fa9
+        target: /var/lib/mysql
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 200M
+      restart_policy:
+        condition: on-failure
+    networks:
+      - internal
+  web:  # tên service 
+    # replace username/repo:tag with your name and image details
+    image: khamsuckhoe:latest  # Image được dùng để tạo container cho service
+    depends_on: 
+      - mysql
+    volumes:
+      - type: bind
+        source: .
+        target: /usr/src/app
+    ports:  # Port mapping
+      - "0.0.0.0:8002:80"
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 200M
+      restart_policy:
+        condition: on-failure
+    networks:
+      - internal
+
+networks:
+  internal:
+volumes:
+  549d6f6b405eefbb7160556886769a814f0749bcdda481b8ebaf6bf640562fa9:
+    external: true
